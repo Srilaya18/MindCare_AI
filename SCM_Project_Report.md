@@ -16,10 +16,13 @@ The following files and components constitute the primary Configuration Items (C
 
 *(Note: Database Schema and external Test Case scripts are considered optional and deferred to future release cycles).*
 
-## 3. SCM Tools Used
-- **Version Control:** Git
-- **Hosting / Collaboration Placeholder:** GitHub (Remote tracking)
-- **Dependency Management:** `pip` / `requirements.txt`
+## 3. SCM Tools Used & Enhancements
+- **Version Control:** Git (Local tracking engine).
+- **Hosting & Collaboration:** GitHub (Remote tracking platform).
+- **Continuous Integration (CI/CD):** GitHub Actions. Automatically tests the codebase on every push to `main`, ensuring no broken code reaches production.
+- **Containerization (Environment SCM):** Docker. A `Dockerfile` guarantees that the application runs in identical environments everywhere.
+- **Dependency Management:** `pip` / `requirements.txt`.
+- **Automated Testing & Linting:** `pytest` (Unit testing CI) and `flake8` (Code standard enforcement CI).
 
 ## 4. SCM Activities
 ### 4.1. Version Control
