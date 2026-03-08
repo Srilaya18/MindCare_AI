@@ -69,7 +69,7 @@ def analyze_stress(text):
         else:
             message = "You seem to be in a relatively good or balanced space. Keep up the positive habits!"
 
-    return stress_level, message
+    return stress_level, message, topic
 
 @app.route('/')
 def home():
@@ -84,21 +84,79 @@ def analyze():
         return jsonify({'error': 'No text provided'}), 400
         
     text = data['text']
-    stress_level, message = analyze_stress(text)
+    stress_level, message, topic = analyze_stress(text)
     
+    # 3. Dynamic Resources based on Topic
+    resources = []
+    if topic == "academic":
+        resources = [
+            {'name': 'University Academic Advising', 'contact': 'Visit your campus advising center'},
+            {'name': 'Student Counseling Services', 'contact': 'Confidential campus support: 1-800-CAMPUS'}
+        ]
+    elif topic == "sleep":
+        resources = [
+            {'name': 'Sleep Foundation Helpline', 'contact': '1-800-SLEEP-WELL'},
+            {'name': 'Local Sleep Clinic', 'contact': 'Consult your primary care physician'}
+        ]
+    elif topic == "social":
+        resources = [
+            {'name': 'Crisis Text Line', 'contact': 'Text HOME to 741741'},
+            {'name': 'Community Support Groups', 'contact': 'Check local meetup boards for peer support'}
+        ]
+    elif topic == "career":
+        resources = [
+            {'name': 'Employee Assistance Program (EAP)', 'contact': 'Check with your HR department'},
+            {'name': 'Career Counseling Center', 'contact': 'Local workforce development board'}
+        ]
+    else:
+        resources = [
+            {'name': 'National Mental Health Helpline', 'contact': '9152987821'},
+            {'name': 'General Counseling Center', 'contact': 'Reach out to your local clinic'}
+        ]
+
+    # 4. Dynamic Tips based on Topic
+    tips = []
+    if topic == "academic":
+        tips = [
+            'Try the Pomodoro Technique (25 min study, 5 min break)',
+            'Organize your notes into a daily to-do list',
+            'Stay hydrated and avoid excessive caffeine',
+            'Form a study group for peer support'
+        ]
+    elif topic == "sleep":
+        tips = [
+            'Maintain a consistent sleep schedule, even on weekends',
+            'Turn off all screens at least 1 hour before bed',
+            'Ensure your room is cool, dark, and quiet',
+            'Try a guided meditation right before sleeping'
+        ]
+    elif topic == "social":
+        tips = [
+            'Reach out to one friend or family member today',
+            'Join a local club or community class',
+            'Limit your time on highly-curated social media',
+            'Journal about your feelings to process them'
+        ]
+    elif topic == "career":
+        tips = [
+            'Set strict working hours and silence notifications after work',
+            'Take your full lunch break away from your desk',
+            'Communicate your workload clearly to your manager',
+            'Focus on one task at a time rather than multitasking'
+        ]
+    else:
+        tips = [
+            'Practice 4-7-8 breathing when feeling overwhelmed',
+            'Take a 15-minute walk outside daily',
+            'Focus on eating nutritious, balanced meals',
+            'Talk to a trusted friend or family member'
+        ]
+
     response = {
         'stress_level': stress_level,
         'message': message,
-        'resources': [
-            {'name': 'National Mental Health Helpline', 'contact': '9152987821'},
-            {'name': 'Student Counseling Center', 'contact': 'Reach out to your campus counseling center'}
-        ],
-        'tips': [
-            'Practice 4-7-8 breathing',
-            'Take a 15-minute walk outside',
-            'Maintain a consistent sleep schedule',
-            'Talk to a trusted friend or family member'
-        ]
+        'resources': resources,
+        'tips': tips
     }
     return jsonify(response)
 
