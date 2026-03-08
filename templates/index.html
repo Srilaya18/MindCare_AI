@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCare - AI Mental Health Support</title>
+    <meta name="description" content="AI-Assisted Community-Centric Mental Health Counseling Platform">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        .header-box {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 4rem 0 5rem 0;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 3rem;
+            margin-top: -60px;
+        }
+        .btn-custom {
+            background: #4f46e5;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 30px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-custom:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        textarea {
+            border-radius: 16px;
+            border: 2px solid #e5e7eb;
+            padding: 20px;
+            font-size: 1.1rem;
+            resize: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            background: #fafafa;
+        }
+        textarea:focus {
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            border-color: #4f46e5;
+            background: #ffffff;
+            outline: none;
+        }
+        .result-box {
+            display: none;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stress-HIGH { color: #dc2626; font-weight: 700; background: #fee2e2; padding: 4px 12px; border-radius: 20px;}
+        .stress-MEDIUM { color: #d97706; font-weight: 700; background: #fef3c7; padding: 4px 12px; border-radius: 20px;}
+        .stress-LOW { color: #16a34a; font-weight: 700; background: #dcfce7; padding: 4px 12px; border-radius: 20px;}
+        
+        .resource-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left: 5px solid #7c3aed;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: transform 0.2s;
+        }
+        .resource-card:hover {
+            transform: translateX(4px);
+        }
+        .support-msg-box {
+            background: #f5f3ff;
+            border: 1px solid #ede9fe;
+            border-left: 5px solid #8b5cf6;
+            padding: 24px;
+            border-radius: 16px;
+        }
+        .spinner-border {
+            display: none;
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+        .list-tips li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-box text-center">
+    <div class="container">
+        <h1 class="fw-bold mb-3">MindCare AI</h1>
+        <p class="lead mb-0" style="opacity: 0.9;">Community-Centric Mental Health Support</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="main-card">
+                <h3 class="mb-3 fw-bold">How are you feeling today?</h3>
+                <p class="text-muted mb-4 fs-5">Share your thoughts, feelings, or stress. Our AI will guide you to the right support resources completely anonymously.</p>
+                
+                <form id="analyzeForm">
+                    <div class="mb-4">
+                        <textarea class="form-control" id="userInput" rows="5" placeholder="e.g., I feel very stressed about my exams and can't sleep..." required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-custom text-white fs-5">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Analyze & Get Support
+                        </button>
+                    </div>
+                </form>
+
+                <div id="resultBox" class="result-box mt-5 pt-4 border-top">
+                    <!-- Results Header -->
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="fw-bold mb-0">Analysis Result</h4>
+                        <div>
+                            <span class="text-muted me-2">Stress Level:</span>
+                            <span id="stressLevel" class="fs-6"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="support-msg-box shadow-sm mb-4">
+                        <h6 class="text-uppercase fw-bold mb-2" style="font-size: 0.75rem; color: #6d28d9; letter-spacing: 1px;">AI Support Message</h6>
+                        <p id="supportMessage" class="mb-0 fs-5" style="color: #4c1d95; font-style: italic;"></p>
+                    </div>
+                    
+                    <div class="row mt-5">
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-geo-alt-fill me-2 text-primary" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+                                Community Resources
+                            </h6>
+                            <div id="resourcesList"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lightbulb-fill me-2 text-warning" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z"/></svg>
+                                Self-Help Tips
+                            </h6>
+                            <div class="bg-white p-4 rounded-4 shadow-sm border">
+                                <ul id="tipsList" class="list-tips ps-3 mb-0"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('analyzeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = document.getElementById('userInput').value;
+    const btn = document.querySelector('button[type="submit"]');
+    const spinner = document.querySelector('.spinner-border');
+    
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    
+    try {
+        const response = await fetch('/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        
+        const data = await response.json();
+        
+        const stressEl = document.getElementById('stressLevel');
+        stressEl.textContent = data.stress_level;
+        stressEl.className = `stress-${data.stress_level}`;
+        
+        document.getElementById('supportMessage').textContent = `"${data.message}"`;
+        
+        const resList = document.getElementById('resourcesList');
+        resList.innerHTML = '';
+        data.resources.forEach(r => {
+            resList.innerHTML += `
+                <div class="resource-card shadow-sm">
+                    <h6 class="mb-1 text-dark">${r.name}</h6>
+                    <p class="mb-0 text-muted small mt-1">
+                        <strong>Contact:</strong> ${r.contact}
+                    </p>
+                </div>
+            `;
+        });
+        
+        const tipsList = document.getElementById('tipsList');
+        tipsList.innerHTML = '';
+        data.tips.forEach(t => {
+            tipsList.innerHTML += `<li>${t}</li>`;
+        });
+        
+        document.getElementById('resultBox').style.display = 'block';
+        
+    } catch (err) {
+        alert('Error analyzing text. Please ensure the backend is running and try again.');
+    } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        
+        setTimeout(() => {
+            document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
+    }
+});
+</script>
+
+</body>
+</html>
