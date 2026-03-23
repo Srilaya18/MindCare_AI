@@ -1,13 +1,13 @@
 import os
 import json
 from flask import Flask, render_template, request, jsonify
-from openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 SYSTEM_PROMPT = """
 You are MindCare AI, a compassionate mental health support assistant.
@@ -33,17 +33,21 @@ Always respond with ONLY the JSON object. No preamble, no explanation outside JS
 
 
 def classify_and_respond(user_text):
-    """Send user text to OpenAI and return parsed response."""
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_text}
-        ],
-        temperature=0.7,
-        max_tokens=600
+    """Send user text to Gemini and return parsed response."""
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-flash",
+        system_instruction=SYSTEM_PROMPT
     )
-    raw = response.choices[0].message.content.strip()
+
+    response = model.generate_content(
+        user_text,
+        generation_config=genai.types.GenerationConfig(
+            temperature=0.7,
+            response_mime_type="application/json",
+        )
+    )
+
+    raw = response.text.strip()
     return json.loads(raw)
 
 
