@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python)
 ![Flask](https://img.shields.io/badge/Flask-2.3-green?style=flat-square&logo=flask)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)
-![CI/CD](https://img.shields.io/badge/CI/CD-Bitbucket%20Pipelines-blue?style=flat-square&logo=bitbucket)
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-blue?style=flat-square&logo=github)
 
 ---
 
@@ -16,7 +16,6 @@ mindcare-ai/
 ├── app.py                          # Flask backend + OpenAI logic
 ├── requirements.txt                # Python dependencies
 ├── Dockerfile                      # Container definition
-├── bitbucket-pipelines.yml         # Bitbucket CI/CD
 ├── .github/workflows/python-app.yml # GitHub Actions CI/CD
 ├── .flake8                         # Linting config
 ├── .gitignore
@@ -98,8 +97,7 @@ docker run -p 5000:5000 -e OPENAI_API_KEY=sk-your-key mindcare-ai
 | **flake8** | Code linting |
 | **pytest** | Automated testing |
 | **Docker** | Containerization |
-| **Bitbucket Pipelines** | CI/CD for Bitbucket repos |
-| **GitHub Actions** | CI/CD for GitHub repos |
+| **GitHub Actions** | CI/CD pipeline |
 
 Pipelines run automatically on every push/PR on `main` or `develop`.
 

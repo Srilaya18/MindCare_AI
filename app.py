@@ -35,7 +35,7 @@ Always respond with ONLY the JSON object. No preamble, no explanation outside JS
 def classify_and_respond(user_text):
     """Send user text to Gemini and return parsed response."""
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+        model_name="gemini-2.5-flash",
         system_instruction=SYSTEM_PROMPT
     )
 
