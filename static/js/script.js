@@ -45,27 +45,39 @@ async function analyzeText() {
 }
 
 function renderResult(data) {
-  // Stress Banner
+  // Stress Banner & Mood Emoji
   const banner = document.getElementById('stressBanner');
   const stressValue = document.getElementById('stressValue');
-  const stressIcon = document.getElementById('stressIcon');
+  const moodEmoji = document.getElementById('moodEmoji');
   const level = (data.stress_level || 'LOW').toUpperCase();
 
-  banner.className = 'stress-banner mb-4';
+  // Reset & Apply Classes
+  banner.className = 'stress-banner mb-4 d-flex align-items-center justify-content-center gap-3';
   if (level === 'HIGH') {
-    banner.classList.add('level-high');
-    stressIcon.textContent = '🚨';
+    banner.style.background = 'rgba(239, 68, 68, 0.15)';
+    banner.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+    stressValue.style.color = '#fca5a5';
   } else if (level === 'MEDIUM') {
-    banner.classList.add('level-medium');
-    stressIcon.textContent = '⚠️';
+    banner.style.background = 'rgba(245, 158, 11, 0.15)';
+    banner.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+    stressValue.style.color = '#fcd34d';
   } else {
-    banner.classList.add('level-low');
-    stressIcon.textContent = '✅';
+    banner.style.background = 'rgba(52, 211, 153, 0.15)';
+    banner.style.border = '1px solid rgba(52, 211, 153, 0.3)';
+    stressValue.style.color = '#6ee7b7';
   }
+
   stressValue.textContent = level;
+  moodEmoji.textContent = data.mood_emoji || '🧠';
+
+  // Affirmation
+  document.getElementById('affirmationText').textContent = data.daily_affirmation || '';
 
   // Empathy
   document.getElementById('empathyText').textContent = data.empathy || '';
+
+  // Next Step
+  document.getElementById('nextStepText').textContent = data.next_step || 'Take a deep breath and relax.';
 
   // Tips
   const tipsList = document.getElementById('tipsList');

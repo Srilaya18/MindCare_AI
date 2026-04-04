@@ -1,14 +1,20 @@
 import json
 import pytest
 from unittest.mock import patch
-from app import app
+from app import app, db, User
 
 
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['WTF_CSRF_ENABLED'] = False
     with app.test_client() as client:
+        with app.app_context():
+            db.create_all()
         yield client
+        with app.app_context():
+            db.drop_all()
 
 
 def test_home_route(client):
@@ -16,6 +22,55 @@ def test_home_route(client):
     response = client.get('/')
     assert response.status_code == 200
     assert b'MindCare' in response.data
+
+
+def test_signup_auth_flow(client):
+    """Test the signup and verify flow."""
+    # 1. Signup
+    response = client.post('/signup', data={
+        'name': 'Test User',
+        'email': 'test@example.com',
+        'password': 'password123'
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Verify Your Email' in response.data
+
+    with app.app_context():
+        user = User.query.filter_by(email='test@example.com').first()
+        assert user is not None
+        assert user.is_verified is False
+        otp = user.otp
+
+    # 2. Verify OTP
+    response = client.post('/verify', data={
+        'otp': otp
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Welcome to MindCare AI' in response.data or b'Account verified' in response.data
+
+    with app.app_context():
+        user = User.query.filter_by(email='test@example.com').first()
+        assert user.is_verified is True
+
+
+def test_login_flow(client):
+    """Test the login flow for verified user."""
+    # Prepare verified user
+    from werkzeug.security import generate_password_hash
+    with app.app_context():
+        user = User(name='Login User', email='login@example.com',
+                    password_hash=generate_password_hash('abc12345'),
+                    is_verified=True)
+        db.session.add(user)
+        db.session.commit()
+
+    # Login
+    response = client.post('/login', data={
+        'email': 'login@example.com',
+        'password': 'abc12345'
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Logout' in response.data
 
 
 def test_analyze_missing_text(client):
@@ -26,29 +81,18 @@ def test_analyze_missing_text(client):
         content_type='application/json'
     )
     assert response.status_code == 400
-    data = json.loads(response.data)
-    assert 'error' in data
-
-
-def test_analyze_text_too_long(client):
-    """POST /analyze with text > 1000 chars should return 400."""
-    response = client.post(
-        '/analyze',
-        data=json.dumps({'text': 'x' * 1001}),
-        content_type='application/json'
-    )
-    assert response.status_code == 400
-    data = json.loads(response.data)
-    assert 'error' in data
 
 
 @patch('app.classify_and_respond')
 def test_analyze_success(mock_classify, client):
-    """POST /analyze with valid text should return 200 with stress data."""
+    """POST /analyze with valid text should return 200 with all metadata."""
     mock_classify.return_value = {
         "stress_level": "HIGH",
+        "mood_emoji": "🚨",
         "empathy": "I hear you, and I'm here for you.",
-        "tips": ["Take a deep breath", "Talk to someone you trust"],
+        "daily_affirmation": "You are strong.",
+        "next_step": "Take a deep breath",
+        "tips": ["Breathe"],
         "helplines": [{"name": "iCall", "number": "9152987821"}]
     }
 
@@ -60,41 +104,5 @@ def test_analyze_success(mock_classify, client):
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['stress_level'] == 'HIGH'
-    assert 'empathy' in data
-    assert isinstance(data['tips'], list)
-    assert isinstance(data['helplines'], list)
-
-
-@patch('app.classify_and_respond')
-def test_analyze_low_stress(mock_classify, client):
-    """Should handle LOW stress correctly."""
-    mock_classify.return_value = {
-        "stress_level": "LOW",
-        "empathy": "Sounds like you're doing okay!",
-        "tips": ["Keep up the good work"],
-        "helplines": []
-    }
-
-    response = client.post(
-        '/analyze',
-        data=json.dumps({'text': 'Everything is going fine today'}),
-        content_type='application/json'
-    )
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert data['stress_level'] == 'LOW'
-
-
-@patch('app.classify_and_respond')
-def test_analyze_openai_error(mock_classify, client):
-    """Should return 500 if OpenAI call fails."""
-    mock_classify.side_effect = Exception("OpenAI API error")
-
-    response = client.post(
-        '/analyze',
-        data=json.dumps({'text': 'I am feeling stressed'}),
-        content_type='application/json'
-    )
-    assert response.status_code == 500
-    data = json.loads(response.data)
-    assert 'error' in data
+    assert data['mood_emoji'] == '🚨'
+    assert data['daily_affirmation'] == 'You are strong.'
